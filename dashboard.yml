@@ -1,0 +1,62 @@
+name: AI 模拟投资仪表板 · 云端自动更新
+
+on:
+  schedule:
+    # 台湾时间 09:00 - 14:30（UTC+8），周一至五，每 30 分钟一次
+    # UTC 01:00 - 06:30，cron 表达式以 UTC 为准
+    - cron: '*/30 1-6 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 运行 AI 模拟投资引擎（仅刷新净值，不交易）
+        env:
+          QUOTES_API: ${{ vars.QUOTES_API }}
+        run: |
+          python portfolio_sim.py --update
+          cp portfolio_dashboard.html index.html
+
+      - name: 提交并推送更新
+        run: |
+          git config user.name "AI Portfolio Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add portfolio_dashboard.html index.html portfolio_sim.json
+          git diff --cached --quiet || git commit -m "净值/行情更新 $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传站点文件
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: 部署到 GitHub Pages
+        uses: actions/deploy-pages@v4

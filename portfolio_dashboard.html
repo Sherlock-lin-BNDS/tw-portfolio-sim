@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang='zh-Hant'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>AI 模拟投资仪表板（台股·10万·30%回撤）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;}
+body{background:#f5f7fa;color:#1f2937;padding:28px;line-height:1.6;}
+.wrap{max-width:1180px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.06);overflow:hidden;}
+.head{background:linear-gradient(120deg,#0f4c81,#1b6ca8);color:#fff;padding:26px 34px;}
+.head h1{font-size:22px;font-weight:700;}
+.head .sub{margin-top:6px;font-size:13px;opacity:.92;}
+.head .meta{margin-top:12px;font-size:12px;background:rgba(255,255,255,.12);display:inline-block;padding:5px 12px;border-radius:20px;}
+.ai-tag{display:inline-block;margin-bottom:10px;background:#34d399;color:#064e3b;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;}
+.sec{padding:22px 34px;border-bottom:1px solid #eef1f5;}
+.sec h2{font-size:16px;color:#0f4c81;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec h2::before{content:'';width:5px;height:18px;background:#1b6ca8;border-radius:3px;}
+.card-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.metric{flex:1;min-width:140px;background:#f8fafc;border:1px solid #e6ebf1;border-radius:10px;padding:13px 15px;}
+.metric .v{font-size:21px;font-weight:700;color:#0f4c81;} .metric .v.red{color:#c0392b;} .metric .v.green{color:#1e8449;}
+.metric .l{font-size:12px;color:#64748b;margin-top:3px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px;}
+th,td{padding:8px 9px;text-align:right;border-bottom:1px solid #eef1f5;}
+th{background:#f1f5f9;color:#334155;font-weight:600;white-space:nowrap;} td.l,th.l{text-align:left;}
+tr:hover td{background:#f8fafc;}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#e7f0fb;color:#1b6ca8;}
+.up{color:#c0392b;font-weight:600;} .down{color:#1e8449;font-weight:600;}
+.note{font-size:12px;color:#64748b;} .chart{width:100%;height:320px;}
+.box{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:12px 15px;font-size:13px;margin-top:10px;}
+.box.warn{background:#fef2f2;border-color:#f5c6c6;color:#9b2c2c;}
+.box.info{background:#eff6ff;border-color:#bfdbfe;color:#1e40af;}
+ul{margin:6px 0 6px 20px;font-size:13px;} li{margin:4px 0;}
+.disclaimer{background:#334155;color:#cbd5e1;font-size:12px;padding:16px 34px;line-height:1.7;}
+.btn{display:inline-block;background:#1b6ca8;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;}
+.btn:hover{background:#0f4c81;}
+#liveStatus{font-size:12px;color:#64748b;margin-left:10px;}
+.inp{padding:6px 8px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;width:100%;box-sizing:border-box;background:#fff;}
+.btn.sm{padding:3px 9px;font-size:11px;margin-right:4px;}
+.btn.danger{background:#c0392b;} .btn.danger:hover{background:#9b2c2c;}
+.news-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.news-card{background:#f8fafc;border:1px solid #e6ebf1;border-radius:10px;padding:12px 14px;}
+.news-card .nc-h{font-size:13px;color:#0f4c81;margin-bottom:8px;border-bottom:1px solid #e6ebf1;padding-bottom:6px;}
+.news-item{font-size:12.5px;padding:5px 0;border-bottom:1px dashed #eef1f5;}
+.news-item a{color:#1b6ca8;text-decoration:none;} .news-item a:hover{text-decoration:underline;}
+.loggrid{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px;}
+@media(max-width:760px){.sec{padding:18px;}.tablewrap{overflow-x:auto;}}
+</style>
+<script src='https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js'></script>
+</head><body><div class='wrap'>
+<div class='head'>
+  <span class='ai-tag'>★ AI 模拟投资 · 被动执行 30% 回撤容忍计划</span>
+  <h1>台股 10 万元 · AI 模拟投资仪表板</h1>
+  <div class='sub'>由 AI 抓实时行情、双週調倉（执行前先呈报）、自动记账 ｜ 数据：证交所官方盘 + Yahoo Finance</div>
+  <div class='meta'>更新 2026-08-26 21:36:03 ｜ 本次动作：僅更新淨值 ｜ 共 7 笔交易</div>
+</div>
+<div class='sec'>
+  <h2>① 组合概览</h2>
+  <div class='card-row'>
+    <div class='metric'><div class='v'>100,484</div><div class='l'>总资产(元)</div></div>
+    <div class='metric'><div class='v red'>+484</div><div class='l'>累计盈亏(元)</div></div>
+    <div class='metric'><div class='v red'>+0.5%</div><div class='l'>我的报酬率</div></div>
+    <div class='metric'><div class='v'>26,332</div><div class='l'>现金缓冲(元)</div></div>
+    <div class='metric'><div class='v'>26.3%</div><div class='l'>现金比例</div></div>
+    <div class='metric'><div class='v'>74,152</div><div class='l'>权益市值(元)</div></div>
+  </div>
+  <div class='grid2' style='display:grid;grid-template-columns:1fr 1fr;gap:18px'>
+    <div><div id='pie' class='chart'></div></div>
+    <div><div id='nav' class='chart'></div><div class='note' style='text-align:center'>净值走势（每次运行记录一笔）</div></div>
+  </div>
+</div>
+<div class='sec'>
+  <h2>② 持仓 · 实时行情与报酬率
+    <button id='refreshBtn' class='btn' style='margin-left:auto'>🔄 刷新实时行情</button>
+    <label class='note' style='margin-left:10px'><input type='checkbox' id='autoChk'> 自动刷新(30s)</label>
+    <span id='liveStatus' class='note'></span>
+  </h2>
+  <div class='tablewrap'>
+  <table><thead><tr><th class='l'>标的</th><th>股数</th><th>成本</th><th>实时价(来源)</th><th>今日涨跌</th><th>我的报酬率</th><th>市值</th><th>实际权重</th><th>目标</th><th>漂移</th><th>盈亏</th></tr></thead>
+  <tbody id='holdRows'></tbody></table>
+  </div>
+  <div class='box info'>「今日涨跌」以昨收为基准；「我的报酬率」= (现价×股数 − 成本×股数) / 成本。<b>实时价支持三种来源，按优先级自动选择：</b>① 云端报价 API（配置 QUOTES_API 后任意环境可用，GitHub Pages/云端托管推荐）② 本地代理服务器 live_server.py（127.0.0.1/localhost 打开时）③ 兜底浏览器直连 Yahoo（受 CORS 限制，仅尽力而为）。页面当前嵌入的价格为最近一次引擎运行的快照，点「🔄 刷新」可拉取最新。</div>
+</div>
+<div class='sec'>
+  <h2>③ 我的交易日志（可编辑）</h2>
+  <div class='box info'>本日志存在你的浏览器（localStorage），可随时<b>新增 / 編輯 / 刪除</b>，並用「分篇筛选」按标的查看；自動彙算買入/賣出/淨投入/淨股數。首次開啟會把 AI 引擎的建倉記錄匯入，之後你可自由修改（不會影響引擎的模擬持倉）。⚠️ 僅存於本瀏覽器，換裝置或清快取會遺失，重要紀錄請另行備份。</div>
+  <div class='loggrid'>
+    <div style='flex:1;min-width:150px'><label class='note'>日期</label><br><input id='f_date' type='date' class='inp'></div>
+    <div style='flex:1;min-width:140px'><label class='note'>标的</label><br><select id='f_code' class='inp'></select></div>
+    <div style='flex:1;min-width:100px'><label class='note'>方向</label><br><select id='f_side' class='inp'><option value='buy'>买</option><option value='sell'>卖</option></select></div>
+    <div style='flex:1;min-width:90px'><label class='note'>股数</label><br><input id='f_shares' type='number' class='inp' placeholder='1-999'></div>
+    <div style='flex:1;min-width:100px'><label class='note'>价格</label><br><input id='f_price' type='number' step='0.01' class='inp'></div>
+    <div style='flex:1;min-width:90px'><label class='note'>手续费</label><br><input id='f_fee' type='number' class='inp' placeholder='0'></div>
+    <div style='flex:2;min-width:170px'><label class='note'>备注</label><br><input id='f_note' type='text' class='inp' placeholder='选填'></div>
+    <div><button id='saveLog' class='btn'>＋ 新增</button></div>
+  </div>
+  <div style='margin:8px 0 12px'>
+    <label class='note'>分篇筛选：</label>
+    <select id='logFilter' class='inp' style='width:auto'></select>
+    <button id='clearLog' class='btn sm danger' style='margin-left:8px'>清空我的日志</button>
+  </div>
+  <div class='card-row'>
+    <div class='metric'><div class='v' id='sumBuy'>0</div><div class='l'>累计买入(元)</div></div>
+    <div class='metric'><div class='v' id='sumSell'>0</div><div class='l'>累计卖出(元)</div></div>
+    <div class='metric'><div class='v' id='sumNet'>0</div><div class='l'>净投入(元)</div></div>
+    <div class='metric'><div class='v' id='sumShares'>0</div><div class='l'>净股数</div></div>
+  </div>
+  <div class='tablewrap'>
+    <table><thead><tr><th class='l'>日期</th><th class='l'>标的</th><th>方向</th><th>股数</th><th>价格</th><th>金额</th><th>手续费</th><th class='l'>备注</th><th>操作</th></tr></thead>
+    <tbody id='logRows'></tbody></table>
+  </div>
+  <h3 style='margin:18px 0 8px;font-size:14px;color:#334155'>AI 引擎自动成交（只读 · 模拟）</h3>
+  <div class='tablewrap'>
+    <table><thead><tr><th class='l'>时间</th><th class='l'>标的</th><th>股数</th><th>价格</th><th>金额</th><th>手续费/税</th><th class='l'>备注</th></tr></thead>
+    <tbody id='tradeRows'></tbody></table>
+  </div>
+</div>
+<div class='sec'>
+  <h2>④ 产业新闻
+    <button id='newsBtn' class='btn' style='margin-left:auto'>🔄 刷新新闻</button>
+    <span id='newsStatus' class='note'></span>
+  </h2>
+  <div style='margin:4px 0 12px'>
+    <label class='note'>按标的筛选：</label>
+    <select id='newsFilter' class='inp' style='width:auto'></select>
+  </div>
+  <div class='box info'>新闻来源：FinMind <code>TaiwanStockNews</code>（免 token、已确认支持浏览器跨域）。抓取各档最新交易日新闻；点「刷新新闻」由浏览器直连 FinMind 即時拉取。僅供參考，請自行核實準確性。</div>
+  <div id='newsWrap' class='news-wrap'></div>
+</div>
+<div class='sec'>
+  <h2>⑤ 运行说明</h2>
+  <ul>
+    <li><b>实时价来源：</b>股票走证交所官方盘 (mis.twse.com.tw) 即时价；ETF(00919)与回退走 Yahoo Finance。盘后/休市时回退到上次价或 FinMind 收盘价。</li>
+    <li><b>双週調倉（执行前先呈报）：</b>每兩週由 AI 计算调仓提案（买/卖哪些、股数、金额），<b>先呈报给你确认，绝不擅自交易</b>；你同意后我才执行。</li>
+    <li><b>手续费：</b>买入 0.1425%(最低20)；卖出加 0.3% 证交税(ETF 0.1%)。</li>
+    <li><b>定时任务：</b>每个交易日自动刷新净值/实时价；每兩週自动生成调仓提案并通知你。</li>
+  </ul>
+</div>
+<div class='disclaimer'>
+免责声明：本仪表板为「AI 模拟投资（纸面交易）」演示，所有交易均为虚拟、不涉及真实资金；价格取自公开实时源，存在延迟/误差，非下单依据或投资建议。市场有风险，投资需谨慎；过往表现不预示未来收益。
+</div>
+</div>
+<script>var DATA = {"asof": "2026-08-26 21:36:03", "capital": 100000, "cash": 26331.77, "total": 100483.54, "pnl": 483.54, "ret_pct": 0.004835350000000035, "equity": 74151.77, "action": "僅更新淨值", "prices": {"0050": 105.9, "2330": 2415.0, "2454": 3945.0, "2357": 971.0, "00919": 31.21, "2412": 136.0, "2884": 38.7}, "src": {"0050": "TWSE即時", "2330": "TWSE即時", "2454": "TWSE即時", "2357": "TWSE即時", "00919": "Yahoo", "2412": "TWSE即時", "2884": "TWSE即時"}, "target": {"0050": 0.18, "2330": 0.15, "2454": 0.08, "2357": 0.08, "00919": 0.13, "2412": 0.08, "2884": 0.05}, "holdings": [{"code": "0050", "name": "元大台湾50", "shares": 171, "avg_cost": 104.9, "price": 105.9, "src": "TWSE即時", "chg": 0.014367816091954023, "high": 106.05, "low": 103.5, "ts": "13:30:00", "mv": 18108.9, "w": 0.1802175849008497, "target": 0.18, "drift": 0.00021758490084969329, "pnl": 171.0, "ret_pct": 0.009532888465205058}, {"code": "2330", "name": "台积电", "shares": 6, "avg_cost": 2397.5, "price": 2415.0, "src": "TWSE即時", "chg": 0.00625, "high": 2425.0, "low": 2375.0, "ts": "13:30:00", "mv": 14490.0, "w": 0.14420272933272102, "target": 0.15, "drift": -0.005797270667278975, "pnl": 105.0, "ret_pct": 0.007299270072992803}, {"code": "00919", "name": "群益台湾精选高息", "shares": 417, "avg_cost": 31.13, "price": 31.21, "src": "Yahoo", "chg": 0.004505954296749294, "high": 31.42, "low": 30.98, "ts": 1787722203, "mv": 13014.57, "w": 0.12951942823269502, "target": 0.13, "drift": -0.0004805717673049825, "pnl": 33.36, "ret_pct": 0.0025698682942498774}, {"code": "2454", "name": "联发科", "shares": 2, "avg_cost": 3852.5, "price": 3945.0, "src": "TWSE即時", "chg": 0.05622489959839357, "high": 3965.0, "low": 3710.0, "ts": "13:30:00", "mv": 7890.0, "w": 0.0785203267381069, "target": 0.08, "drift": -0.0014796732618931052, "pnl": 185.0, "ret_pct": 0.0240103828682674}, {"code": "2412", "name": "中华电信", "shares": 58, "avg_cost": 136.25, "price": 136.0, "src": "TWSE即時", "chg": -0.003663003663003663, "high": 136.5, "low": 135.5, "ts": "13:30:00", "mv": 7888.0, "w": 0.07850042297974488, "target": 0.08, "drift": -0.001499577020255119, "pnl": -14.5, "ret_pct": -0.0018348623853210455}, {"code": "2357", "name": "华硕", "shares": 8, "avg_cost": 953.5, "price": 971.0, "src": "TWSE即時", "chg": 0.04972972972972973, "high": 980.0, "low": 919.0, "ts": "13:30:00", "mv": 7768.0, "w": 0.07730619747802463, "target": 0.08, "drift": -0.0026938025219753747, "pnl": 140.0, "ret_pct": 0.018353434714210692}, {"code": "2884", "name": "玉山金", "shares": 129, "avg_cost": 38.62, "price": 38.7, "src": "TWSE即時", "chg": -0.007692307692307619, "high": 39.4, "low": 38.4, "ts": "13:30:00", "mv": 4992.3, "w": 0.04968276643531699, "target": 0.05, "drift": -0.0003172335646830157, "pnl": 9.68, "ret_pct": 0.001941747572815622}], "trades": [{"ts": "2026-08-26 10:01:37", "code": "2884", "name": "玉山金", "side": "buy", "shares": 129, "price": 38.625, "fee": 20, "tax": 0, "amount": 4982.625, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "2412", "name": "中华电信", "side": "buy", "shares": 58, "price": 136.25, "fee": 20, "tax": 0, "amount": 7902.5, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "00919", "name": "群益台湾精选高息", "side": "buy", "shares": 417, "price": 31.13, "fee": 20, "tax": 0, "amount": 12981.21, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "2357", "name": "华硕", "side": "buy", "shares": 8, "price": 953.5, "fee": 20, "tax": 0, "amount": 7628.0, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "2454", "name": "联发科", "side": "buy", "shares": 2, "price": 3852.5, "fee": 20, "tax": 0, "amount": 7705.0, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "2330", "name": "台积电", "side": "buy", "shares": 6, "price": 2397.5, "fee": 20, "tax": 0, "amount": 14385.0, "note": "初始建仓·被動執行30%計畫"}, {"ts": "2026-08-26 10:01:37", "code": "0050", "name": "元大台湾50", "side": "buy", "shares": 171, "price": 104.9, "fee": 26, "tax": 0, "amount": 17937.9, "note": "初始建仓·被動執行30%計畫"}], "snapshots": [{"ts": "2026-08-26 10:01:37", "total": 99854.0, "cash": 26331.77, "equity": 73522.23, "pnl": -146.0}, {"ts": "2026-08-26 10:01:56", "total": 99823.67, "cash": 26331.77, "equity": 73491.9, "pnl": -176.33}, {"ts": "2026-08-26 10:06:30", "total": 99688.28, "cash": 26331.77, "equity": 73356.51, "pnl": -311.72}, {"ts": "2026-08-26 10:11:41", "total": 99725.19, "cash": 26331.77, "equity": 73393.42, "pnl": -274.81}, {"ts": "2026-08-26 10:12:13", "total": 99739.96, "cash": 26331.77, "equity": 73408.2, "pnl": -260.04}, {"ts": "2026-08-26 10:12:15", "total": 99729.96, "cash": 26331.77, "equity": 73398.2, "pnl": -270.04}, {"ts": "2026-08-26 10:36:00", "total": 100147.24, "cash": 26331.77, "equity": 73815.48, "pnl": 147.24}, {"ts": "2026-08-26 11:11:42", "total": 100265.02, "cash": 26331.77, "equity": 73933.25, "pnl": 265.02}, {"ts": "2026-08-26 11:12:56", "total": 100262.18, "cash": 26331.77, "equity": 73930.42, "pnl": 262.18}, {"ts": "2026-08-26 21:33:21", "total": 100483.54, "cash": 26331.77, "equity": 74151.77, "pnl": 483.54}, {"ts": "2026-08-26 21:36:03", "total": 100483.54, "cash": 26331.77, "equity": 74151.77, "pnl": 483.54}], "rebal_thresh": 0.05, "rebal_mode": "雙週調倉(執行前先呈報)", "news": {"0050": [{"date": "2026-08-26 01:31:19", "title": "0050登社會新聞！陳幸妤兒喊翻倍惹議…周冠男讚觀念對：善用時間複利 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9714466"}, {"date": "2026-08-26 01:42:22", "title": "趙建銘2300萬教育基金若全買0050，3年後會變多少？ 網友試算驚人數字曝光 - 風傳媒", "source": "風傳媒", "link": "https://www.storm.mg/lifestyle/11159334"}, {"date": "2026-08-26 01:52:41", "title": "買0050不如台積電（2330）？楚狂人公開復盤：別小看其餘四成持股威力| 存股族愛ETF | 股市 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9714517"}, {"date": "2026-08-26 02:25:00", "title": "趙建銘承諾還2300萬！陳幸妤喊「買0050都翻倍了」 網試算報酬率驚人 - FTNN 新聞網", "source": "FTNN 新聞網", "link": "https://www.ftnn.com.tw/news/573257"}, {"date": "2026-08-26 04:09:04", "title": "陳幸妤2300萬買0050！年化極端保守5％：每年提領4％家用約2千萬、18年後本金破3100萬 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9714949"}, {"date": "2026-08-26 04:18:45", "title": "009816狂甩0050！半年報酬48.49%勝出4.16個百分點 陳重銘揭「這招」才是關鍵 - Yahoo股市", "source": "Yahoo股市", "link": "https://tw.stock.yahoo.com/news/009816%E7%8B%82%E7%94%A90050-%E5%8D%8A%E5%B9%B4%E5%A0%B1%E9%85%AC48-49-%E5%8B%9D%E5%87%BA4-16%E5%80%8B%E7%99%BE%E5%88%86%E9%BB%9E-035000911.html"}, {"date": "2026-08-26 04:19:27", "title": "009816狂甩0050！半年報酬48.49%勝出4.16個百分點 陳重銘揭「這招」才是關鍵 - Yahoo股市", "source": "Yahoo股市", "link": "https://tw.stock.yahoo.com/news/009816%E7%8B%82%E7%94%A90050-%E5%8D%8A%E5%B9%B4%E5%A0%B1%E9%85%AC48-49-%E5%8B%9D%E5%87%BA4-16%E5%80%8B%E7%99%BE%E5%88%86%E9%BB%9E-035000911.html"}, {"date": "2026-08-26 05:38:33", "title": "台股大漲 個股成交前五大全被 ETF 包辦 零股成交第一0050 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9715242"}], "2330": [{"date": "2026-08-26 01:02:00", "title": "台積電跌25元至2375　台股跌240點失守45K - ETtoday財經雲", "source": "ETtoday財經雲", "link": "https://finance.ettoday.net/news/3225822"}, {"date": "2026-08-26 01:04:00", "title": "台股開盤跌逾200點！指數45K震盪整理 台積電跌20元 - TVBS新聞網", "source": "TVBS新聞網", "link": "https://news.tvbs.com.tw/money/4012760"}, {"date": "2026-08-26 01:11:34", "title": "2330 台積電 - 晶片為科技戰焦點，法媒關注中國挖角台灣人才竊密- 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183132174"}, {"date": "2026-08-26 01:52:41", "title": "買0050不如台積電（2330）？楚狂人公開復盤：別小看其餘四成持股威力| 存股族愛ETF | 股市 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9714517"}, {"date": "2026-08-26 01:53:03", "title": "2330 台積電 - 世紀漲停板紀錄！今天全部解套賺錢！ 感謝Catherines... - 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183139438"}, {"date": "2026-08-26 01:53:09", "title": "台積電(2330)ADR收紅！中東局勢降溫美股齊揚，台指期大漲405點-同學會主播-哈妮 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/forumnews-e34e487c-a0f0-11f1-bf85-673f1568b8d3"}, {"date": "2026-08-26 01:53:09", "title": "台積電(2330)ADR收紅！中東局勢降溫美股齊揚，台指期大漲405點-財經焦點情報站 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/forumnews-e34e487c-a0f0-11f1-bf85-673f1568b8d3"}, {"date": "2026-08-26 02:09:55", "title": "2330 台積電 - 台積電 ADR 收紅提振多頭士氣，資金強勢點火CPO 與 ABF 族群 - 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183142356"}], "2454": [{"date": "2026-08-26 01:38:00", "title": "《半導體》Google TPU v10還沒定案 法人力挺聯發科、維持買進 - 富聯網", "source": "富聯網", "link": "https://ww2.money-link.com.tw/RealtimeNews/NewsContent.aspx?sn=6282510001&pu=News_0002_2"}, {"date": "2026-08-26 01:43:00", "title": "綠光開場！權值股摔成一片、台積電下挫20元 聯發科逆勢小漲2% - FTNN 新聞網", "source": "FTNN 新聞網", "link": "https://www.ftnn.com.tw/news/573254"}, {"date": "2026-08-26 01:51:01", "title": "《半導體》Google TPU v10還沒定案法人力挺聯發科、維持買進- 上市櫃 - 旺得富理財網", "source": "旺得富理財網", "link": "https://wantrich.chinatimes.com/news/20260826900148-420101"}, {"date": "2026-08-26 02:02:57", "title": "2454 聯發科 - 項莊舞劍，意在沛公- 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183141092"}, {"date": "2026-08-26 03:00:18", "title": "聯發科一掃連日陰霾強彈逾半根停板 分析師：尚未擺脫停滯期 - Yahoo股市", "source": "Yahoo股市", "link": "https://tw.stock.yahoo.com/news/%E8%81%AF%E7%99%BC%E7%A7%91%E4%B8%80%E6%8E%83%E9%80%A3%E6%97%A5%E9%99%B0%E9%9C%BE%E5%BC%B7%E5%BD%88%E9%80%BE%E5%8D%8A%E6%A0%B9%E5%81%9C%E6%9D%BF-%E5%88%86%E6%9E%90%E5%B8%AB%EF%BC%9A%E5%B0%9A%E6%9C%AA%E6%93%BA%E8%84%AB%E5%81%9C%E6%BB%AF%E6%9C%9F-025514272.html"}, {"date": "2026-08-26 06:13:16", "title": "台股開低走高飆663點！聯發科強漲210元 - 財經新聞 - PChome Online 新聞 - PChome Online 新聞", "source": "PChome Online 新聞", "link": "https://news.pchome.com.tw/finance/nownews/20260826/index-78772479619975207003.html"}, {"date": "2026-08-26 06:14:18", "title": "台股開低走高飆663點！聯發科強漲210元 | NOWNEWS今日新聞 - LINE TODAY", "source": "LINE TODAY", "link": "https://today.line.me/tw/v3/article/KwVmenn"}, {"date": "2026-08-26 08:47:27", "title": "三大法人買賣超 – 外資買超(2330)台積電、(2454)聯發科，投信買超(3081)聯亞、(6669)緯穎，法人合計買超593.87億元 - sinotrade.com.tw", "source": "sinotrade.com.tw", "link": "https://www.sinotrade.com.tw/richclub/MarketTrends/%E4%B8%89%E5%A4%A7%E6%B3%95%E4%BA%BA%E8%B2%B7%E8%B3%A3%E8%B6%85-%E2%80%93-%E5%A4%96%E8%B3%87%E8%B2%B7%E8%B6%85-2330-%E5%8F%B0%E7%A9%8D%E9%9B%BB--2454-%E8%81%AF%E7%99%BC%E7%A7%91-%E6%8A%95%E4%BF%A1%E8%B2%B7%E8%B6%85-3081-%E8%81%AF%E4%BA%9E--6669-%E7%B7%AF%E7%A9%8E-%E6%B3%95%E4%BA%BA%E5%90%88%E8%A8%88%E8%B2%B7%E8%B6%85593-87%E5%84%84%E5%85%83--0826--6a8ea2226040320b88ff4c39"}], "2357": [{"date": "2026-08-26 02:46:00", "title": "鴻海、緯創、廣達、緯穎、華碩…輝達明年漲價15%，老AI股誰最吃補？最新目標價：這檔擁4成甜頭 - 今周刊", "source": "今周刊", "link": "https://www.businesstoday.com.tw/article/category/183008/post/202608260009/"}, {"date": "2026-08-26 02:48:00", "title": "華碩ROG科隆展新品齊發，主攻高階助抵禦成本壓力- 新聞 - MoneyDJ", "source": "MoneyDJ", "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=731baa52-3195-4990-99dd-7b1548b3bb6b"}, {"date": "2026-08-26 03:24:28", "title": "2357 華碩 - 華碩參展德國科隆展電競新品齊發ROG XBOX Ally X20掌機強攻下半年旺季- 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183155333"}, {"date": "2026-08-26 07:38:28", "title": "【即時新聞】最新00918成分股曝光！華碩挾AI伺服器優勢與高ROE入列，長線動能看旺 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/newsyoudeservetoknow-20db6706-a121-11f1-8477-283248d6e60d"}, {"date": "2026-08-26 08:32:42", "title": "2357 華碩 - 川習會9 月登場前，華為與惠普簽多年專利授權協議- 股市爆料同學會 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/forum/article/183198395"}], "00919": [{"date": "2026-08-26 01:00:57", "title": "「殖利率之王」00919配息下周一開獎！追平1元是小菜？月領1萬要幾張？達人3劇本推演：年息逾14％超頂- 基金 - 旺得富理財網", "source": "旺得富理財網", "link": "https://wantrich.chinatimes.com/news/20260826900113-420401"}, {"date": "2026-08-26 02:12:00", "title": "138萬股民喜迎！00919連2日盤中刷天價　下周配息戰高 - ETtoday財經雲", "source": "ETtoday財經雲", "link": "https://finance.ettoday.net/news/3225851"}, {"date": "2026-08-26 02:13:54", "title": "金控股大漲、金融指數狂飆含金量高的台股ETF 00919超閃亮| 太報 - LINE TODAY", "source": "LINE TODAY", "link": "https://today.line.me/tw/v3/article/x2EP8O8"}, {"date": "2026-08-26 02:14:28", "title": "金控股大漲、金融指數狂飆含金量高的台股ETF 00919超閃亮| 太報 - LINE TODAY", "source": "LINE TODAY", "link": "https://today.line.me/tw/v3/article/x2EP8O8"}, {"date": "2026-08-26 02:45:00", "title": "00919股價連創新高，配息1.1元穩了？吃完金融股大行情，9月除息前還能衝？現在買會太貴？一次解答 - 今周刊", "source": "今周刊", "link": "https://www.businesstoday.com.tw/article/category/183013/post/202608260010/"}, {"date": "2026-08-26 03:13:45", "title": "00919衝破31元！第3季配息倒數…能再創新高？棒棒：3情境推估| 存股族愛ETF | 股市 - UDN", "source": "UDN", "link": "https://udn.com/news/story/123006/9714746"}, {"date": "2026-08-26 03:21:02", "title": "9月配息1表看》00919、00918、00981A要來了！00406A、00940、00939...15檔下周打頭陣：「這3支」殖利率＞10％最香 - 旺得富理財網", "source": "旺得富理財網", "link": "https://wantrich.chinatimes.com/news/20260826900215-420401"}, {"date": "2026-08-26 03:21:49", "title": "9月配息1表看》00919、00918、00981A要來了！00406A、00940、00939...15檔下周打頭陣：「這3支」殖利率＞10％最香 - 旺得富理財網", "source": "旺得富理財網", "link": "https://wantrich.chinatimes.com/news/20260826900215-420401"}], "2412": [{"date": "2026-08-26 06:06:00", "title": "個股：中華電(2412)8/31受邀參加Goldman Sachs舉辦之投資人會議 - 富聯網", "source": "富聯網", "link": "https://ww2.money-link.com.tw/realtimenews/NewsContent.aspx?SN=2412749002&PU=1002"}], "2884": [{"date": "2026-08-25 03:36:33", "title": "【11:36 即時新聞】玉山金(2884)股價穩步走強至39.1元，金融股輪動＋主力與投信買盤延續支撐高檔格局 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/cmoneyairesearcher-2b1726d4-a036-11f1-96cf-d5dd8c2ae83b"}, {"date": "2026-08-25 03:36:33", "title": "【11:36 即時新聞】玉山金(2884)股價穩步走強至39.1元，金融股輪動＋主力與投信買盤延續支撐高檔格局 - CMoney", "source": "CMoney", "link": "https://www.cmoney.tw/notes/note-detail.aspx?nid=1255754"}, {"date": "2026-08-25 08:20:06", "title": "【26Q2財報公告】玉山金(2884) Q2 營收470.2525億元，創歷史新高，季增10.76%、年成長24.25%-CMoney 小編 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/cmoneyaicurator-c74976f6-a05d-11f1-8235-7fe6dd60124d"}, {"date": "2026-08-25 12:55:07", "title": "玉山金(2884)上半年賺逾214億元，下半年獲利能否延續？-Momentum 動能沈沈 - CMoney投資網誌", "source": "CMoney投資網誌", "link": "https://cmnews.com.tw/article/shenyichen-331f7d38-a084-11f1-a398-e938356e0653"}]}, "quotes_api": ""}; 
+var D=DATA;
+function fmtPct(x){return (x==null?'—':(x*100).toFixed(1)+'%');}
+function fmtNum(x){return (x==null?'0':x).toLocaleString('zh-TW',{maximumFractionDigits:0});}
+function chgTxt(c){return c==null?'—':((c>=0?'+':'')+(c*100).toFixed(2)+'%');}
+var Q={}; D.holdings.forEach(function(h){Q[h.code]={price:h.price,prev_close:h.chg!=null?h.price/(1+h.chg):null};});
+function renderHoldings(){
+  var hr='';
+  D.holdings.forEach(function(h){
+    var q=Q[h.code]||{};
+    var price=(q.price!=null)?q.price:h.price;
+    var prev=(q.prev_close!=null)?q.prev_close:(h.chg!=null?price/(1+h.chg):null);
+    var chg=(prev!=null)?(price-prev)/prev:null;
+    var pnlc=h.pnl>=0?'up':'down';
+    var dc=Math.abs(h.drift)>D.rebal_thresh?'down':'';
+    var srcTxt=D.src[h.code]||'';
+    hr+='<tr><td class="l"><b>'+h.code+'</b> '+h.name+'</td>'
+      +'<td>'+h.shares+'</td>'
+      +'<td>'+fmtNum(h.avg_cost)+'</td>'
+      +'<td>'+fmtNum(price)+' <span class="note">'+srcTxt+'</span></td>'
+      +'<td class="'+(chg>=0?'up':'down')+'">'+chgTxt(chg)+'</td>'
+      +'<td class="'+(h.ret_pct>=0?'up':'down')+'">'+(h.ret_pct>=0?'+':'')+fmtPct(h.ret_pct)+'</td>'
+      +'<td>'+fmtNum(h.mv)+'</td>'
+      +'<td>'+fmtPct(h.w)+'</td><td>'+fmtPct(h.target)+'</td>'
+      +'<td class="'+dc+'">'+(h.drift>=0?'+':'')+fmtPct(h.drift)+'</td>'
+      +'<td class="'+pnlc+'">'+(h.pnl>=0?'+':'')+fmtNum(h.pnl)+'</td></tr>';
+  });
+  document.getElementById('holdRows').innerHTML=hr||'<tr><td class="l" colspan="11">尚無持倉</td></tr>';
+}
+renderHoldings();
+var cv=D.holdings.map(function(h){return {name:h.code+' '+h.name,value:+h.mv.toFixed(0)};});
+cv.push({name:'現金緩衝',value:+D.cash.toFixed(0)});
+var pie=echarts.init(document.getElementById('pie'));
+pie.setOption({tooltip:{trigger:'item',formatter:function(p){return p.name+'<br>'+(p.value/D.total*100).toFixed(1)+'%';}},
+  legend:{bottom:0,textStyle:{fontSize:11}},
+  series:[{type:'pie',radius:['42%','70%'],center:['50%','44%'],label:{formatter:'{b}\n{d}%',fontSize:11},data:cv}]});
+var sn=D.snapshots;
+var nav=echarts.init(document.getElementById('nav'));
+nav.setOption({tooltip:{trigger:'axis',formatter:function(pp){var i=pp[0].dataIndex;var s=sn[i];return s.ts+'<br>總資產 '+fmtNum(s.total)+'<br>淨利 '+(s.pnl>=0?'+':'')+fmtNum(s.pnl);}},
+  grid:{left:65,right:20,top:20,bottom:50},
+  xAxis:{type:'category',data:sn.map(function(s){return s.ts.slice(5,16);}),axisLabel:{fontSize:10,rotate:20}},
+  yAxis:{scale:true,name:'元',splitLine:{lineStyle:{color:'#eef1f5'}}},
+  series:[{type:'line',data:sn.map(function(s){return +s.total.toFixed(0);}),smooth:true,
+    itemStyle:{color:'#0f4c81'},areaStyle:{color:'rgba(27,108,168,.12)'},
+    label:{show:true,position:'top',fontSize:10,formatter:function(p){return fmtNum(p.value);}}}]});
+var tr='';
+D.trades.forEach(function(t){
+  var badge=t.side==='buy'?'<span class="tag" style="background:#fde8e8;color:#c0392b">買</span>':'<span class="tag" style="background:#e6f7ee;color:#1e8449">賣</span>';
+  tr+='<tr><td class="l">'+t.ts.slice(0,16)+'</td><td class="l">'+badge+' <b>'+t.code+'</b> '+t.name+'</td>'
+    +'<td>'+t.shares+'</td><td>'+fmtNum(t.price)+'</td><td>'+fmtNum(t.amount)
+    +'</td><td>'+fmtNum(t.fee)+(t.tax?(' +稅'+fmtNum(t.tax)):'')+'</td><td class="l note">'+t.note+'</td></tr>';
+});
+document.getElementById('tradeRows').innerHTML=tr||'<tr><td class="l" colspan="7">尚無交易</td></tr>';
+window.addEventListener('resize',function(){pie.resize();nav.resize();});
+function applyQuotes(data){
+  var qs=(data&&data.quotes)?data.quotes:{};
+  var n=0;
+  Object.keys(qs).forEach(function(code){
+    var q=qs[code];
+    if(q&&q.price!=null){Q[code]={price:+q.price, prev_close:(q.prev_close!=null?+q.prev_close:null)}; n++;}
+  });
+  renderHoldings();
+  return n;
+}
+function refreshLive(){
+  var status=document.getElementById('liveStatus');
+  status.textContent='抓取实时行情中…';
+  if(!D.holdings.length){status.textContent='無持倉';return;}
+  var cloudApi=(D.quotes_api||'').trim();
+  if(cloudApi){
+    fetch(cloudApi,{cache:'no-store'}).then(function(r){return r.json();}).then(function(data){
+      if(data&&data.error){status.textContent='云端报价失败：'+(data.error||'');return;}
+      var n=applyQuotes(data);
+      status.textContent='已更新 '+n+' 檔 · 云端实时 ('+new Date().toLocaleTimeString()+')'+(data.asof?(' · 源 '+data.asof):'');
+    }).catch(function(e){
+      status.textContent='云端报价连接失败，请检查 QUOTES_API 配置';
+    });
+    return;
+  }
+  var isLocalProxy=(location.hostname==='127.0.0.1'||location.hostname==='localhost');
+  if(isLocalProxy){
+    fetch('/api/quotes',{cache:'no-store'}).then(function(r){return r.json();}).then(function(data){
+      if(data&&data.error){status.textContent='代理報價失敗：'+(data.error||'');return;}
+      var n=applyQuotes(data);
+      status.textContent='已更新 '+n+' 檔 · 本地代理实时 ('+new Date().toLocaleTimeString()+')'+(data.asof?(' · 源 '+data.asof):'');
+    }).catch(function(e){
+      status.textContent='本地代理連線失敗，請確認伺服器運行中；或發「刷新」讓我（AI）後台重抓';
+    });
+  } else {
+    // 云端托管页面的回退：尽力直連 Yahoo（通常被 CORS 阻擋）
+    var codes=D.holdings.map(function(h){return h.code;});
+    var pending=codes.length, ok=0;
+    codes.forEach(function(code){
+      var u='https://query1.finance.yahoo.com/v8/finance/chart/'+code+'.TW?interval=1m&range=1d';
+      fetch(u,{mode:'cors'}).then(function(r){return r.json();}).then(function(j){
+        var m=j.chart.result[0].meta; var p=m.regularMarketPrice, pc=m.previousClose;
+        if(p!=null){Q[code]={price:+p, prev_close:pc!=null?+pc:null}; ok++;}
+      }).catch(function(e){})
+      .then(function(){pending--; if(pending===0){renderHoldings();
+        status.textContent = ok ? ('已更新 '+ok+' 檔 · Yahoo 直連 ('+new Date().toLocaleTimeString()+')')
+          : '瀏覽器直連被 CORS 限制，建議配置云端报价源（QUOTES_API），或由 AI 後台重抓嵌入';}});
+    });
+  }
+}
+document.getElementById('refreshBtn').addEventListener('click', refreshLive);
+var autoTimer=null;
+document.getElementById('autoChk').addEventListener('change', function(){
+  if(this.checked){ autoTimer=setInterval(refreshLive, 30000); refreshLive();
+    document.getElementById('liveStatus').textContent='已開啟自動刷新(30秒)'; }
+  else { if(autoTimer) clearInterval(autoTimer); autoTimer=null;
+    document.getElementById('liveStatus').textContent='已關閉自動刷新'; }
+});
+// ===== ③ 可编辑交易日志 (localStorage) =====
+var LS_KEY='ai_sim_trade_log_v1';
+function loadLog(){ try{return JSON.parse(localStorage.getItem(LS_KEY));}catch(e){return null;} }
+function saveLogArr(a){ localStorage.setItem(LS_KEY, JSON.stringify(a)); }
+function seedLog(){
+  if(loadLog()) return;
+  var seed=D.trades.map(function(t){return {id:'seed_'+t.ts, date:t.ts.slice(0,10), code:t.code, side:t.side, shares:t.shares, price:t.price, fee:t.fee, note:t.note};});
+  saveLogArr(seed);
+}
+var editingId=null;
+function renderLog(){
+  var arr=loadLog()||[];
+  var f=document.getElementById('logFilter').value;
+  var rows=arr.filter(function(r){return f==='ALL'||r.code===f;});
+  var html='';
+  rows.forEach(function(r){
+    var badge=r.side==='buy'?'<span class="tag" style="background:#fde8e8;color:#c0392b">買</span>':'<span class="tag" style="background:#e6f7ee;color:#1e8449">賣</span>';
+    html+='<tr data-id="'+r.id+'"><td class="l">'+r.date+'</td><td class="l">'+badge+' <b>'+r.code+'</b></td><td>'+r.shares+'</td><td>'+fmtNum(r.price)+'</td><td>'+fmtNum(r.shares*r.price)+'</td><td>'+fmtNum(r.fee||0)+'</td><td class="l note">'+(r.note||'')+'</td><td><button class="btn sm edit-btn">編輯</button> <button class="btn sm danger del-btn">刪除</button></td></tr>';
+  });
+  document.getElementById('logRows').innerHTML=html||'<tr><td class="l" colspan="9">尚無紀錄</td></tr>';
+  var buy=0,sell=0,net=0;
+  arr.forEach(function(r){ if(r.side==='buy'){buy+=r.shares*r.price;} else {sell+=r.shares*r.price;} net+=(r.side==='buy'?r.shares:-r.shares); });
+  document.getElementById('sumBuy').textContent=fmtNum(buy);
+  document.getElementById('sumSell').textContent=fmtNum(sell);
+  document.getElementById('sumNet').textContent=fmtNum(buy-sell);
+  document.getElementById('sumShares').textContent=fmtNum(net);
+}
+function addLog(){
+  var date=document.getElementById('f_date').value||new Date().toISOString().slice(0,10);
+  var code=document.getElementById('f_code').value;
+  var side=document.getElementById('f_side').value;
+  var shares=parseInt(document.getElementById('f_shares').value)||0;
+  var price=parseFloat(document.getElementById('f_price').value)||0;
+  var fee=parseFloat(document.getElementById('f_fee').value)||0;
+  var note=document.getElementById('f_note').value||'';
+  if(shares<=0||price<=0){ alert('請填寫有效的股數與價格'); return; }
+  var arr=loadLog()||[];
+  if(editingId){
+    var r=arr.find(function(x){return x.id===editingId;});
+    if(r){r.date=date;r.code=code;r.side=side;r.shares=shares;r.price=price;r.fee=fee;r.note=note;}
+    saveLogArr(arr); editingId=null; document.getElementById('saveLog').textContent='＋ 新增';
+  } else {
+    arr.push({id:'L'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36), date:date, code:code, side:side, shares:shares, price:price, fee:fee, note:note});
+    saveLogArr(arr);
+  }
+  renderLog();
+  document.getElementById('f_shares').value=''; document.getElementById('f_price').value=''; document.getElementById('f_fee').value=''; document.getElementById('f_note').value='';
+}
+function editLog(id){
+  var arr=loadLog()||[]; var r=arr.find(function(x){return x.id===id;}); if(!r) return;
+  editingId=id;
+  document.getElementById('f_date').value=r.date;
+  document.getElementById('f_code').value=r.code;
+  document.getElementById('f_side').value=r.side;
+  document.getElementById('f_shares').value=r.shares;
+  document.getElementById('f_price').value=r.price;
+  document.getElementById('f_fee').value=r.fee||0;
+  document.getElementById('f_note').value=r.note||'';
+  document.getElementById('saveLog').textContent='✓ 更新';
+}
+function delLog(id){
+  if(!confirm('確定刪除此筆交易紀錄？')) return;
+  var arr=(loadLog()||[]).filter(function(x){return x.id!==id;});
+  saveLogArr(arr); renderLog();
+}
+function clearLog(){
+  if(!confirm('確定清空所有「我的交易紀錄」？（AI 引擎自動成交不影響）')) return;
+  localStorage.removeItem(LS_KEY); renderLog();
+}
+// ===== ④ 產業新聞 =====
+var NAME_MAP={}; D.holdings.forEach(function(h){NAME_MAP[h.code]=h.name;});
+function buildNewsList(){
+  return Object.keys(D.news).map(function(code){ return {code:code, name:NAME_MAP[code]||code, items:D.news[code]||[]}; });
+}
+function renderNews(list){
+  var html='';
+  list.forEach(function(n){
+    html+='<div class="news-card"><div class="nc-h">'+n.code+' '+n.name+'</div>';
+    if(!n.items.length){ html+='<div class="note">近 5 日無新聞</div>'; }
+    n.items.forEach(function(it){
+      var title=it.title||'(無標題)';
+      var link=it.link?('<a href="'+it.link+'" target="_blank" rel="noopener">'+title+' ↗</a>'):title;
+      html+='<div class="news-item">'+(it.date?('['+it.date+'] '):'')+link+(it.source?(' <span class="note">· '+it.source+'</span>'):'')+'</div>';
+    });
+    html+='</div>';
+  });
+  document.getElementById('newsWrap').innerHTML=html;
+}
+function fetchNewsOne(code, day){
+  var p=new URLSearchParams({dataset:'TaiwanStockNews',data_id:code,start_date:day});
+  return fetch('https://api.finmindtrade.com/api/v4/data?'+p.toString(),{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){ var rows=j.data||[]; return rows.slice(0,8).map(function(x){return {date:x.date,title:x.title||x.news_title||x.description||'',source:x.source,link:x.link};}); })
+    .catch(function(){ return null; });
+}
+function refreshNews(){
+  var st=document.getElementById('newsStatus'); st.textContent='抓取新聞中…';
+  var codes=Object.keys(D.news); var pending=codes.length;
+  codes.forEach(function(code){
+    fetchNewsOne(code, new Date().toISOString().slice(0,10)).then(function(items){
+      if(items&&items.length){ D.news[code]=items; }
+    }).then(function(){ pending--; if(pending===0){ renderNews(buildNewsList()); st.textContent='已更新 '+codes.length+' 檔新聞 ('+new Date().toLocaleTimeString()+') · FinMind 即時'; } });
+  });
+}
+// ===== init 可编辑日志 & 新聞 =====
+(function initLogNews(){
+  var cf=document.getElementById('f_code');
+  var cfo=''; D.holdings.forEach(function(h){ cfo+='<option value="'+h.code+'">'+h.code+' '+h.name+'</option>'; }); cfo+='<option value="其他">其他</option>'; cf.innerHTML=cfo;
+  document.getElementById('f_date').value=new Date().toISOString().slice(0,10);
+  var lf=document.getElementById('logFilter');
+  var lfo='<option value="ALL">全部</option>'; D.holdings.forEach(function(h){ lfo+='<option value="'+h.code+'">'+h.code+' '+h.name+'</option>'; }); lf.innerHTML=lfo;
+  lf.addEventListener('change', renderLog);
+  document.getElementById('saveLog').addEventListener('click', addLog);
+  document.getElementById('clearLog').addEventListener('click', clearLog);
+  document.getElementById('logRows').addEventListener('click', function(e){
+    var tr=e.target.closest('tr'); if(!tr) return; var id=tr.getAttribute('data-id'); if(!id) return;
+    if(e.target.classList.contains('edit-btn')) editLog(id);
+    else if(e.target.classList.contains('del-btn')) delLog(id);
+  });
+  seedLog(); renderLog();
+  var nf=document.getElementById('newsFilter');
+  var nfo='<option value="ALL">全部</option>'; D.holdings.forEach(function(h){ nfo+='<option value="'+h.code+'">'+h.code+' '+h.name+'</option>'; }); nf.innerHTML=nfo;
+  nf.addEventListener('change', function(){ var v=this.value; renderNews(v==='ALL'?buildNewsList():buildNewsList().filter(function(n){return n.code===v;})); });
+  document.getElementById('newsBtn').addEventListener('click', refreshNews);
+  renderNews(buildNewsList());
+})();
+</script>
+</body></html>
