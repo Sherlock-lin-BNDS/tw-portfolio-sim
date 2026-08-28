@@ -1,0 +1,5 @@
+# 排除本地缓存与校验文件（不进仓库）
+finmind_result.json
+*.pyc
+__pycache__/
+_check*.js
